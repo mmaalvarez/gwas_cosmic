@@ -122,8 +122,8 @@ workflow {
 	
 	// Downstream analyses and plots
 
-	preclump_flattened_output = preclump_flattened_output_linear.mix(flattened_output_regenie) // same flattened_output_regenie... 
-	clumped_flattened_output = clumped_flattened_output_linear.mix(flattened_output_regenie) // ...as here
+	preclump_flattened_output = preclump_flattened_output_linear.mix(flattened_output_regenie).collect() // same flattened_output_regenie... 
+	clumped_flattened_output = clumped_flattened_output_linear.mix(flattened_output_regenie).collect() // ...as here
 
 	qqplot(
 	  preclump_flattened_output,
