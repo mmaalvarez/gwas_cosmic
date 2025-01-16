@@ -105,7 +105,7 @@ process QC2 {
     """
 }
 
-process rm_high_het_samples {
+process get_outliers {
 
     label 'short_high'
 
@@ -117,18 +117,26 @@ process rm_high_het_samples {
           path(imiss_QC2_pruned),
           path(lmiss_QC2_pruned)
 	val(qc_het_SD)
+	    tuple path(bed_QC2_unpruned),
+          path(bim_QC2_unpruned),
+          path(fam_QC2_unpruned)
+	path(gold_standard_allele_freqs)
+	val(allele_freq_deviation)
+	val(plink_path)
 
     output:
-    path('het_outliers')
+    path('het_outliers'), emit: high_het_samples
+	path('allele_freq_deviated'), emit: allele_freq_deviated
 
     script:
     """
-    Rscript "${System.env.work_dir}"/scripts/5_rm_high_het_samples.R ${het_QC2_pruned} ${qc_het_SD}
+    Rscript "${System.env.work_dir}"/scripts/5_get_outliers.R ${het_QC2_pruned} ${qc_het_SD} ${bed_QC2_unpruned} ${gold_standard_allele_freqs} ${allele_freq_deviation} ${plink_path}
     """
 
     stub:
     """
     touch het_outliers
+	touch allele_freq_deviated
     """
 }
 
@@ -141,35 +149,37 @@ process QC3 {
           path(bim_QC2_unpruned),
           path(fam_QC2_unpruned)
 	path(het_outliers)
+	path(allele_freq_deviated)
+	val(mac)
 	val(prune_window_size)
 	val(prune_step_size)
 	val(prune_r2)
 
     output:
-    tuple path('QC3_het.bed'),
-          path('QC3_het.bim'),
-          path('QC3_het.fam'), emit: unpruned
-    tuple path('QC3_het_pruned.bed'),
-          path('QC3_het_pruned.bim'),
-          path('QC3_het_pruned.fam'), emit: pruned
-    tuple path('QC3_het_pruned.eigenvec'),
-          path('QC3_het_pruned.eigenval'), emit: pca
+    tuple path('QC3_het_afreq.bed'),
+          path('QC3_het_afreq.bim'),
+          path('QC3_het_afreq.fam'), emit: unpruned
+    tuple path('QC3_het_afreq_pruned.bed'),
+          path('QC3_het_afreq_pruned.bim'),
+          path('QC3_het_afreq_pruned.fam'), emit: pruned
+    tuple path('QC3_het_afreq_pruned.eigenvec'),
+          path('QC3_het_afreq_pruned.eigenval'), emit: pca
 
     script:
     """
-    bash "${System.env.work_dir}"/scripts/6_QC3.sh ${bed_QC2_unpruned} ${het_outliers} ${prune_window_size} ${prune_step_size} ${prune_r2}
+    bash "${System.env.work_dir}"/scripts/6_QC3.sh ${bed_QC2_unpruned} ${het_outliers} ${allele_freq_deviated} ${mac} ${prune_window_size} ${prune_step_size} ${prune_r2}
     """
 
     stub:
     """
-    touch QC3_het.bed
-    touch QC3_het.bim
-    touch QC3_het.fam
-    touch QC3_het_pruned.bed
-    touch QC3_het_pruned.bim
-    touch QC3_het_pruned.fam
-    touch QC3_het_pruned.eigenvec
-    touch QC3_het_pruned.eigenval
+    touch QC3_het_afreq.bed
+    touch QC3_het_afreq.bim
+    touch QC3_het_afreq.fam
+    touch QC3_het_afreq_pruned.bed
+    touch QC3_het_afreq_pruned.bim
+    touch QC3_het_afreq_pruned.fam
+    touch QC3_het_afreq_pruned.eigenvec
+    touch QC3_het_afreq_pruned.eigenval
     """
 }
 

@@ -7,7 +7,7 @@ include { vcf_preprocessing } from './modules/vcf_preprocessing'
 include { QC1 } from './modules/qc'
 include { ancestry_clustering } from './modules/qc'
 include { QC2 } from './modules/qc'
-include { rm_high_het_samples } from './modules/qc'
+include { get_outliers } from './modules/qc'
 include { QC3 } from './modules/qc'
 include { prepare_linear } from './modules/linear'
 include { linear_clumping } from './modules/linear'
@@ -62,19 +62,26 @@ workflow {
 		params.prune_r2
     )
 
-    rm_high_het_samples(
+    get_outliers(
         QC2.out.pruned,
-		params.qc_het_SD
+		params.qc_het_SD,
+		QC2.out.unpruned,
+        file(params.gold_standard_allele_freqs),
+		params.allele_freq_deviation,
+		params.plink_path
     )
+    // report how many SNPs were removed due to MAF deviating from gold standard
+    get_outliers.out.allele_freq_deviated.collectFile(name: 'res/allele_freq_deviated')
 
     QC3(
 		QC2.out.unpruned,
-        rm_high_het_samples.out,
+        get_outliers.out.high_het_samples,
+        get_outliers.out.allele_freq_deviated,
+		params.mac,
 		params.prune_window_size,
 		params.prune_step_size,
 		params.prune_r2
     )
-
 
     // SNP-wise simple linear model with PLINK
 
@@ -87,15 +94,16 @@ workflow {
 
     linear_clumping(
 		QC3.out.unpruned,
+		QC3.out.pruned,
 		prepare_linear.out,
 		params.clump_p1,
 		params.clump_kb,
 		params.clump_r2
     )
 
-    preclump_flattened_output_linear = linear_clumping.out.preclump
+    preclump_pruned_flattened_output_linear = linear_clumping.out.preclump_pruned
         .flatten()
-        .collectFile(name: 'linear_preclump', keepHeader: true,
+        .collectFile(name: 'linear_preclump_pruned', keepHeader: true,
 					 storeDir: 'res/')
 
     clumped_flattened_output_linear = linear_clumping.out.clumped
@@ -109,25 +117,33 @@ workflow {
 
 	regenie_gwas(
 		QC3.out.unpruned,
+		QC3.out.pruned,
         file(params.sample_metadata),
-        file(params.original_continuous_phenotype)
+        file(params.original_continuous_phenotype),
+		params.clump_p1,
+		params.clump_kb,
+		params.clump_r2
 	)
 
-    flattened_output_regenie = regenie_gwas.out
+    preclump_pruned_flattened_output_regenie = regenie_gwas.out.preclump_pruned
         .flatten()
-        .collectFile(name: 'regenie', keepHeader: true,
+        .collectFile(name: 'regenie_preclump_pruned', keepHeader: true,
 					 storeDir: 'res/')
-        .view { "Finished GWAS using REGENIE - Results saved in res/regenie" }
 
+    clumped_flattened_output_regenie = regenie_gwas.out.clumped
+        .flatten()
+        .collectFile(name: 'regenie_clumped', keepHeader: true,
+					 storeDir: 'res/')
+        .view { "Finished GWAS using REGENIE - Results saved in res/regenie_*" }
 	
+
 	// Downstream analyses and plots
 
-	preclump_flattened_output = preclump_flattened_output_linear.mix(flattened_output_regenie).collect() // same flattened_output_regenie... 
-	clumped_flattened_output = clumped_flattened_output_linear.mix(flattened_output_regenie).collect() // ...as here
+	preclump_pruned_flattened_output = preclump_pruned_flattened_output_linear.collect().mix(preclump_pruned_flattened_output_regenie).collect()
+	clumped_flattened_output = clumped_flattened_output_linear.collect().mix(clumped_flattened_output_regenie).collect()
 
 	qqplot(
-	  preclump_flattened_output,
-	  QC3.out.pruned
+	  preclump_pruned_flattened_output
 	)
 
 	manhattan(

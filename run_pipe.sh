@@ -16,7 +16,7 @@ if [[ "$hostname" == "lsflogin" || "$hostname" == "hpc" ]]; then
 	export partition_slow_long="medium"
 	export partition_slowest_unlimited="long"
 	export project_group="-P re_gecip_cancer_pan"
-	export TMPDIR="/re_scratch/re_gecip/"$project_group"/malvarez"
+	export TMPDIR="/re_scratch/re_gecip/cancer_pan/malvarez"
 
 elif [[ "$hostname" == "fsupeksvr" ]]; then
 

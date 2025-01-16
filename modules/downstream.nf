@@ -1,32 +1,31 @@
 process qqplot {
 
-    label 'short_low'
+    label 'short_high'
 
-    publishDir "$PWD/res/", pattern: '*.{jpg}', mode: 'copy'
+    publishDir "$PWD/res/", pattern: '*.{jpg,tsv}', mode: 'copy'
 
     input:
-    path(preclump_flattened_output)
-	tuple path(bed_Q3_pruned),
-		  path(bim_Q3_pruned),
-		  path(fam_Q3_pruned)
+    path(preclump_pruned_flattened_output)
 
     output:
 	path('*.jpg')
+	path('fdr_thresholds_*.tsv')
 
     script:
     """
-    Rscript "${System.env.work_dir}"/scripts/9a_qqplot.R ${preclump_flattened_output} ${bim_Q3_pruned}
+    Rscript "${System.env.work_dir}"/scripts/9a_qqplot.R ${preclump_pruned_flattened_output}
     """
 
     stub:
     """
 	touch dummy.jpg
+	touch fdr_thresholds_dummy.tsv
     """
 }
 
 process manhattan {
 
-    label 'short_low'
+    label 'short_high'
 
     publishDir "$PWD/res/", pattern: '*.{jpg}', mode: 'copy'
 

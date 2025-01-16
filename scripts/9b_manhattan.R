@@ -9,23 +9,16 @@ conflict_prefer("select", "dplyr")
 args = commandArgs(trailingOnly=TRUE)
 
 clumped_flattened_output = ifelse(interactive(),
-                                  yes = Sys.glob("../work/*/*/linear_clumped")[1],
+                                  yes = Sys.glob("../res/linear_clumped")[1],
                                   no = args[1]) %>% 
-  read_delim
+  read_delim %>% 
+  filter(!is.na(SBS))
 
 gwas_method = unique(clumped_flattened_output$method)
 
-# harmonize column names between GWAS methods
-if(gwas_method == "regenie"){
-  
-  clumped_flattened_output = clumped_flattened_output %>% 
-    rename("#CHROM" = "CHROM",
-           "POS" = "GENPOS") %>% 
-    mutate(P = 1*10^-LOG10P)
-}
 
 thr_signif_pval = ifelse(interactive(),
-                         yes = "1e-20",
+                         yes = "1e-25",
                          no = args[2]) %>% 
   as.numeric
 
@@ -63,12 +56,15 @@ manhattan = ggplot(clumped_flattened_output,
                            size = 2.5,
                            segment.color = "grey50",
                            min.segment.length = 0.1,
-                           nudge_x = 0.2) +
+                           nudge_x = 0.2,
+                           max.overlaps = 100000) +
   geom_hline(yintercept = -log10(thr_signif_pval), linetype = "dashed", color = "red") +
   facet_grid(cols = vars(`#CHROM`), scales = "free_x", space = "free_x") +
   labs(x = "Genomic coordinate", y = "-log10(p-value)") +
+  ggtitle(paste0(gsub("linear", "PLINK", gwas_method), " results after clumping")) + 
   theme_minimal() +
-  theme(legend.position = "right",
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "right",
         axis.line.x = element_blank(),
         axis.ticks.x = element_blank(),
         axis.text.x = element_blank(),

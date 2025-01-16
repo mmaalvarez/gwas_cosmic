@@ -27,12 +27,15 @@ process prepare_linear {
 
 process linear_clumping {
 
-    label 'short_medium_ignoreError' // otherwise, clumping warnings about 'no significant SNPs found' are somehow causing Nextflow to stop
+    label 'short_medium'
 
     input:
     tuple path(bed_Q3_unpruned),
           path(bim_Q3_unpruned),
           path(fam_Q3_unpruned)
+    tuple path(bed_Q3_pruned),
+          path(bim_Q3_pruned),
+          path(fam_Q3_pruned)
 	tuple path(age_sex_tumor_pcs),
 		  path(RINT_continuous_phenotype)
 	val(clump_p1)
@@ -41,16 +44,18 @@ process linear_clumping {
 
     output:
 	path('*.linear'), emit: preclump
+	path('*.preclump.pruned'), emit: preclump_pruned
     path('*.clumps'), emit: clumped
 
     script:
     """
-    bash "${System.env.work_dir}"/scripts/8a_linear_clumping.sh ${bed_Q3_unpruned} ${age_sex_tumor_pcs} ${RINT_continuous_phenotype} ${clump_p1} ${clump_kb} ${clump_r2}
+    bash "${System.env.work_dir}"/scripts/8a_linear_clumping.sh ${bed_Q3_unpruned} ${bim_Q3_pruned} ${age_sex_tumor_pcs} ${RINT_continuous_phenotype} ${clump_p1} ${clump_kb} ${clump_r2}
     """
 
     stub:
     """
 	touch dummy.linear
+	touch dummy.preclump.pruned
 	touch dummy.clumps
     """
 }

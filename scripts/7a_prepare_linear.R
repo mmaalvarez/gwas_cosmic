@@ -15,7 +15,7 @@ PCs_covariates = ifelse(interactive(),
   as.numeric
 
 eigenvec = ifelse(interactive(),
-                  yes = Sys.glob("../work/*/*/*_het_pruned.eigenvec")[1],
+                  yes = Sys.glob("../work/*/*/*_het_afreq_pruned.eigenvec")[1],
                   no = args[2]) %>% 
   read_delim(col_names = F) %>% 
   `colnames<-`(c("FID", "IID", paste0("PC", seq(1,length(names(.)))))) %>% 
