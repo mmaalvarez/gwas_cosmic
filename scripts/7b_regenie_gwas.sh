@@ -61,12 +61,15 @@ awk -F'\t' 'NR==1 {
 
 ## REGENIE
 
+# get n categories in tumor_type, to increase the maximum allowed in REGENIE (10) if necessary
+ncat_tumor_type=`awk 'NR==1{for(i=1;i<=NF;i++)if($i=="tumor_type")col=i;next}{print $col}' "$sample_metadata".parsed | sort | uniq | wc -l`
+
 # Step 1, the regression model is fit to the traits, and a set of genomic predictions are produced as output -- also normalize exposures to RINT
 regenie --step 1 \
   --bed $bedbimfam_prefix_name \
   --covarFile "$sample_metadata".parsed \
   --catCovarList sex,tumor_type \
-  --maxCatLevels 20 \
+  --maxCatLevels "$ncat_tumor_type" \
   --phenoFile "$original_continuous_phenotype".parsed \
   --force-qt \
   --bsize 1000 \
@@ -80,7 +83,7 @@ regenie --step 2 \
   --bed $bedbimfam_prefix_name \
   --covarFile "$sample_metadata".parsed \
   --catCovarList sex,tumor_type \
-  --maxCatLevels 20 \
+  --maxCatLevels "$ncat_tumor_type" \
   --phenoFile "$original_continuous_phenotype".parsed \
   --force-qt \
   --bsize 400 \

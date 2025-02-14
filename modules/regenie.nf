@@ -1,6 +1,6 @@
 process regenie_gwas {
 
-	label 'short_medium'
+	label 'short_medium_ignoreError'
 
     input:
     tuple path(bed_Q3_unpruned),
