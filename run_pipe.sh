@@ -25,8 +25,8 @@ elif [[ "$hostname" == "fsupeksvr" ]]; then
 	export work_dir=$PWD
 	export executor="slurm"
 	export partition_fast_short="normal_prio"
-	export partition_slow_long="normal_prio_lon"
-	export partition_slowest_unlimited="normal_prio_unli"
+	export partition_slow_long="normal_prio_long"
+	export partition_slowest_unlimited="normal_prio_unlim"
 	export project_group=""
 
 elif [[ "$hostname" == "irblogin01" ]]; then

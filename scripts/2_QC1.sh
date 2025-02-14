@@ -1,6 +1,6 @@
 #!bin/bash
 
-preprocessed_bcf=$1
+preprocessed_vcf=$1
 high_LD_regions=$2
 good_mappability_regions=$3
 qc_hwe=$4
@@ -10,9 +10,9 @@ prune_step_size=$7
 prune_r2=$8
 
 
-## BCF to PLINK
+## VCF to PLINK
 
-plink --bcf $preprocessed_bcf --make-bed --allow-extra-chr --chr 1-22,25,XY --double-id --fill-missing-a2 --out passed_biallelic_autosomal_snps_geno_maf
+plink --vcf $preprocessed_vcf --make-bed --allow-extra-chr --chr 1-22,25,XY --double-id --fill-missing-a2 --out passed_biallelic_autosomal_snps_geno_maf
 
 ## NOTES
 # --allow-extra-chr --> even though I specified autosomes in previous steps, there may be some weird chr names but nothing of importance, so this allows this to not raise an error

@@ -3,7 +3,7 @@ process QC1 {
     label 'medium_medium'
     
     input:
-    path(preprocessed_bcf)
+    path(preprocessed_vcf)
     path(high_LD_regions)
     path(good_mappability_regions)
 	val(qc_hwe)
@@ -20,7 +20,7 @@ process QC1 {
 
     script:
     """
-    bash "${System.env.work_dir}"/scripts/2_QC1.sh ${preprocessed_bcf} ${high_LD_regions} ${good_mappability_regions} ${qc_hwe} ${qc_mind} ${prune_window_size} ${prune_step_size} ${prune_r2}
+    bash "${System.env.work_dir}"/scripts/2_QC1.sh ${preprocessed_vcf} ${high_LD_regions} ${good_mappability_regions} ${qc_hwe} ${qc_mind} ${prune_window_size} ${prune_step_size} ${prune_r2}
     """
 
     stub:
