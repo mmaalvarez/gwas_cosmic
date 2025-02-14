@@ -42,9 +42,7 @@ rm passed_biallelic_autosomal_snps_geno_maf.bed
 ## 1) rm high LD regions (Anderson 2010)
 # https://raw.githubusercontent.com/cran/plinkQC/master/inst/extdata/high-LD-regions-hg38-GRCh38.bed
 ## 2) keep regions which are possible to align according to the CRG75 alignability track
-# /g/strcombio/fsupek_home/mmunteanu/reference/CRG75.bed --> but this is for hg19, need the hg38 but there is not in UCSC, only crg50
-# I use Maia's, who generated the mappability for 75-mers for hg38 using the GEM package mappability function, which estimates mappability from the reference given a k-mer length and permitted number of mismatches (see https://genome.ucsc.edu/cgi-bin/hgTrackUi?g=wgEncodeMapability&db=hg19). The code was based on https://evodify.com/gem-mappability/ and https://raw.githubusercontent.com/epigen/LIQUORICE/master/liquorice/create_mappability_bigwigs.sh. The GEM library is from https://sourceforge.net/projects/gemlibrary/files/gem-library/Binary%20pre-release%203/GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tbz2 -- Afterwards she also removed 42 blacklisted genomic regions
-# /home/mmunteanu/reference/GRCh38.d1.vd1.mappability_75bp_1_22_XY_woblacklist.bed --> airlocked
+# /g/strcombio/fsupek_home/mmunteanu/reference/CRG75_nochr.bed
 ## 3) rm SNPs not in HWE (P < 1e−x)
 
 plink --bfile passed_biallelic_autosomal_snps_geno_maf_noSplitMultiallelic --exclude range $high_LD_regions --extract range $good_mappability_regions --hwe $qc_hwe --set-missing-var-ids @:# --make-bed --out passed_biallelic_autosomal_snps_geno_maf_noSplitMultiallelic_noHighLDregions_CRG75_hwe

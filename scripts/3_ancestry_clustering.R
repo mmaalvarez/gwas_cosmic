@@ -1,5 +1,4 @@
-if(interactive()){.libPaths(c( .libPaths(), "/tools/aws-workspace-apps/ce/R/4.2.1"))
-                  setwd("~/re_gecip/cancer_pan/malvarez/gwas_cosmic/scripts")}
+if(interactive()){setwd("/g/strcombio/fsupek_data/users/malvarez/projects/gwas_cosmic/scripts")}
 library(tidyverse)
 library(tclust)
 library(conflicted)
