@@ -14,10 +14,11 @@ clump_r2=$7
 # .bed/.bim/.fam from process QC3
 bedbimfam_prefix_name=`echo $bed_plink | sed "s/\.bed//g ; s/.*\///g"`
 
-plink2 --bfile $bedbimfam_prefix_name --glm hide-covar --covar $age_sex_tumor_pcs --covar-variance-standardize --pheno $RINT_continuous_phenotype --make-bed --out linear.tmp
+plink2 --bfile $bedbimfam_prefix_name --glm hide-covar --vif 99999999 --covar $age_sex_tumor_pcs --covar-variance-standardize --pheno $RINT_continuous_phenotype --make-bed --out linear.tmp
 
 ## NOTES
 # --glm == --linear from PLINK 1.9 if phenotype is quantitative
+# --vif 99999999 --> WARNING A multicollinearity check is performed before each regression. When it fails, the regression is skipped and 'NA' results are reported. The main part of this check is a variance inflation factor calculation. If that value is larger than 50, the check fails. You can change the upper bound with --vif. The VIF check is known to be overly strict in several common scenarios; in particular, categorical covariates with a large number of categories will set it off. "When Can You Safely Ignore Multicollinearity?" has more discussion of this. Do not be afraid to greatly increase the --vif threshold after you have studied the problem and confirmed that moderate multicollinearity does not interfere with your analysis
 # --adjust would provide multiple testing correction for several methods, but I will do this correction after the clumping I think
 # hide-covar modifier so that later in the clumping step the covariates pvalues are not included (see below)
 # --covar-variance-standardize --> to avoid "genotype/covariate scales vary too widely for numerical stability of the current implementation"
