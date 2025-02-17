@@ -1,6 +1,6 @@
 process QC1 {
 
-    label 'medium_medium'
+    label 'short_medium_ignoreError'
     
     input:
     path(preprocessed_vcf)
